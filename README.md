@@ -22,6 +22,7 @@ This folder contains the scripts for the iCLIP data analysis for Nepro, Rpp14, R
 
 # step 1: trim and filter 
 zcat flexbar_Out_barcode_Sample1.fastq.gz |fastx_trimmer -Q 33 -l 15 |fastq_quality_filter -Q 33 -q 10 -p 100 |awk 'FNR%4==1{print $1}' |sed 's/@//' >Sample1.qualFilteredIDs
+
 seqtk subseq flexbar_Out_barcode_Sample1.fastq.gz Sample1.qualFilteredIDs |sed 's/ /#/g; s/\//#/g' |gzip > Sample1.fq.gz 
 
 # step 2: mapping
