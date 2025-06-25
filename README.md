@@ -27,6 +27,7 @@ seqtk subseq flexbar_Out_barcode_Sample1.fastq.gz Sample1.qualFilteredIDs |sed '
 # step 2: mapping
 (skip indexing if you have STAR index)
 STAR --runThreadN 64 --genomeDir mm10.star.index.genecode --runMode genomeGenerate --genomeFastaFiles mm10.fa --sjdbGTFfile gencode.v35.annotation.gtf --sjdbOverhang 75  ### you may modify thread number based on your cluster node number
+
 STAR --runMode alignReads --genomeDir mm10.star.index --outFilterMismatchNoverReadLmax 0.04 --outFilterMismatchNmax 999 --outFilterMultimapNmax 1 --alignEndsType Extend5pOfRead1 --sjdbGTFfile gencode.v35.annotation.gtf --sjdbOverhang 75 --outReadsUnmapped Fastx --outSJfilterReads Unique --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --readFilesIn Sample1.fq.gz --runThreadN 8 --outFileNamePrefix Sample1. --outTmpDir Sample1.tmp && samtools index Sample1.Aligned.sortedByCoord.out.bam 
 
 # step 3: remove PCR duplicates 
@@ -34,8 +35,11 @@ umi_tools dedup -I Sample1.Aligned.sortedByCoord.out.bam -L Sample1.dedup.log -S
 
 # step 4: generate bigwigfiles for crosslinkg events 
 bedtools bamtobed -i Sample1.dedup.bam >Sample1.dedup.bam.bed
+
 bedtools shift -m 1 -p -1 -i Sample1.dedup.bam.bed -g mm10.fa.fai >Sample1.dedup.bam.bed.shift.bed
+
 bedtools genomecov -bg -5 -i Sample1.dedup.bam.bed.shift.bed -g mm10.fa.fai |sort -k1,1 -k2,2n >Sample1.bedgraph
+
 bedGraphToBigWig Sample1.bedgraph mm10.fa.fai Sample1.bw
 
 # step 5: call peaks with pureclip
